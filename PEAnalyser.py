@@ -6,6 +6,7 @@ import hashlib
 from collections import Counter
 
 import pefile
+import peutils
 import ssdeep
 import M2Crypto
 import capstone
@@ -285,7 +286,19 @@ class PEAnalyser():
         self.set_resources_info()
         self.set_tls_info()
         self.set_rich_header_info()
+        self.set_signatures_info()
         self.set_certification_info()
+
+    def set_signatures_info(self):
+        signatures = peutils.SignatureDatabase('userdb.txt')
+        matches = signatures.match_all(self.pe, ep_only=True)
+        signatures_set = set()
+        if matches:
+            for item in matches:
+                if item[0] not in signatures_set:
+                    signatures_set.add(item[0])
+        if len(signatures_set) != 0:
+            self.info['PE']['signatures'] = list(signatures_set)
 
     def set_file_header_info(self):
         if hasattr(self.pe, 'FILE_HEADER'):
