@@ -56,6 +56,200 @@ class PEAnalyser():
         'LoaderFlags',  # The number of directory entries in the remainder of the optional header.
         'NumberOfRvaAndSizes'  # A pointer to the first IMAGE_DATA_DIRECTORY structure in the data directory.
     ]
+    __COMPID_DICT = {
+            0: "Unknown",
+            1: "Import0",
+            2: "Linker510",
+            3: "Cvtomf510",
+            4: "Linker600",
+            5: "Cvtomf600",
+            6: "Cvtres500",
+            7: "Utc11_Basic",
+            8: "Utc11_C",
+            9: "Utc12_Basic",
+            10: "Utc12_C",
+            11: "Utc12_CPP",
+            12: "AliasObj60",
+            13: "VisualBasic60",
+            14: "Masm613",
+            15: "Masm710",
+            16: "Linker511",
+            17: "Cvtomf511",
+            18: "Masm614",
+            19: "Linker512",
+            20: "Cvtomf512",
+            21: "Utc12_C_Std",
+            22: "Utc12_CPP_Std",
+            23: "Utc12_C_Book",
+            24: "Utc12_CPP_Book",
+            25: "Implib700",
+            26: "Cvtomf700",
+            27: "Utc13_Basic",
+            28: "Utc13_C",
+            29: "Utc13_CPP",
+            30: "Linker610",
+            31: "Cvtomf610",
+            32: "Linker601",
+            33: "Cvtomf601",
+            34: "Utc12_1_Basic",
+            35: "Utc12_1_C",
+            36: "Utc12_1_CPP",
+            37: "Linker620",
+            38: "Cvtomf620",
+            39: "AliasObj70",
+            40: "Linker621",
+            41: "Cvtomf621",
+            42: "Masm615",
+            43: "Utc13_LTCG_C",
+            44: "Utc13_LTCG_CPP",
+            45: "Masm620",
+            46: "ILAsm100",
+            47: "Utc12_2_Basic",
+            48: "Utc12_2_C",
+            49: "Utc12_2_CPP",
+            50: "Utc12_2_C_Std",
+            51: "Utc12_2_CPP_Std",
+            52: "Utc12_2_C_Book",
+            53: "Utc12_2_CPP_Book",
+            54: "Implib622",
+            55: "Cvtomf622",
+            56: "Cvtres501",
+            57: "Utc13_C_Std",
+            58: "Utc13_CPP_Std",
+            59: "Cvtpgd1300",
+            60: "Linker622",
+            61: "Linker700",
+            62: "Export622",
+            63: "Export700",
+            64: "Masm700",
+            65: "Utc13_POGO_I_C",
+            66: "Utc13_POGO_I_CPP",
+            67: "Utc13_POGO_O_C",
+            68: "Utc13_POGO_O_CPP",
+            69: "Cvtres700",
+            70: "Cvtres710p",
+            71: "Linker710p",
+            72: "Cvtomf710p",
+            73: "Export710p",
+            74: "Implib710p",
+            75: "Masm710p",
+            76: "Utc1310p_C",
+            77: "Utc1310p_CPP",
+            78: "Utc1310p_C_Std",
+            79: "Utc1310p_CPP_Std",
+            80: "Utc1310p_LTCG_C",
+            81: "Utc1310p_LTCG_CPP",
+            82: "Utc1310p_POGO_I_C",
+            83: "Utc1310p_POGO_I_CPP",
+            84: "Utc1310p_POGO_O_C",
+            85: "Utc1310p_POGO_O_CPP",
+            86: "Linker624",
+            87: "Cvtomf624",
+            88: "Export624",
+            89: "Implib624",
+            90: "Linker710",
+            91: "Cvtomf710",
+            92: "Export710",
+            93: "Implib710",
+            94: "Cvtres710",
+            95: "Utc1310_C",
+            96: "Utc1310_CPP",
+            97: "Utc1310_C_Std",
+            98: "Utc1310_CPP_Std",
+            99: "Utc1310_LTCG_C",
+            100: "Utc1310_LTCG_CPP",
+            101: "Utc1310_POGO_I_C",
+            102: "Utc1310_POGO_I_CPP",
+            103: "Utc1310_POGO_O_C",
+            104: "Utc1310_POGO_O_CPP",
+            105: "AliasObj710",
+            106: "AliasObj710p",
+            107: "Cvtpgd1310",
+            108: "Cvtpgd1310p",
+            109: "Utc1400_C",
+            110: "Utc1400_CPP",
+            111: "Utc1400_C_Std",
+            112: "Utc1400_CPP_Std",
+            113: "Utc1400_LTCG_C",
+            114: "Utc1400_LTCG_CPP",
+            115: "Utc1400_POGO_I_C",
+            116: "Utc1400_POGO_I_CPP",
+            117: "Utc1400_POGO_O_C",
+            118: "Utc1400_POGO_O_CPP",
+            119: "Cvtpgd1400",
+            120: "Linker800",
+            121: "Cvtomf800",
+            122: "Export800",
+            123: "Implib800",
+            124: "Cvtres800",
+            125: "Masm800",
+            126: "AliasObj800",
+            127: "PhoenixPrerelease",
+            128: "Utc1400_CVTCIL_C",
+            129: "Utc1400_CVTCIL_CPP",
+            130: "Utc1400_LTCG_MSIL",
+            131: "Utc1500_C",
+            132: "Utc1500_CPP",
+            133: "Utc1500_C_Std",
+            134: "Utc1500_CPP_Std",
+            135: "Utc1500_CVTCIL_C",
+            136: "Utc1500_CVTCIL_CPP",
+            137: "Utc1500_LTCG_C",
+            138: "Utc1500_LTCG_CPP",
+            139: "Utc1500_LTCG_MSIL",
+            140: "Utc1500_POGO_I_C",
+            141: "Utc1500_POGO_I_CPP",
+            142: "Utc1500_POGO_O_C",
+            143: "Utc1500_POGO_O_CPP",
+            144: "Cvtpgd1500",
+            145: "Linker900",
+            146: "Export900",
+            147: "Implib900",
+            148: "Cvtres900",
+            149: "Masm900",
+            150: "AliasObj900",
+            151: "Resource900",
+            152: "AliasObj1000",
+            154: "Cvtres1000",
+            155: "Export1000",
+            156: "Implib1000",
+            157: "Linker1000",
+            158: "Masm1000",
+            170: "Utc1600_C",
+            171: "Utc1600_CPP",
+            172: "Utc1600_CVTCIL_C",
+            173: "Utc1600_CVTCIL_CPP",
+            174: "Utc1600_LTCG_C ",
+            175: "Utc1600_LTCG_CPP",
+            176: "Utc1600_LTCG_MSIL",
+            177: "Utc1600_POGO_I_C",
+            178: "Utc1600_POGO_I_CPP",
+            179: "Utc1600_POGO_O_C",
+            180: "Utc1600_POGO_O_CPP",
+            183: "Linker1010",
+            184: "Export1010",
+            185: "Implib1010",
+            186: "Cvtres1010",
+            187: "Masm1010",
+            188: "AliasObj1010",
+            199: "AliasObj1100",
+            201: "Cvtres1100",
+            202: "Export1100",
+            203: "Implib1100",
+            204: "Linker1100",
+            205: "Masm1100",
+            206: "Utc1700_C",
+            207: "Utc1700_CPP",
+            208: "Utc1700_CVTCIL_C",
+            209: "Utc1700_CVTCIL_CPP",
+            210: "Utc1700_LTCG_C ",
+            211: "Utc1700_LTCG_CPP",
+            212: "Utc1700_LTCG_MSIL",
+            213: "Utc1700_POGO_I_C",
+            214: "Utc1700_POGO_I_CPP",
+            215: "Utc1700_POGO_O_C",
+            216: "Utc1700_POGO_O_CPP",
+        }
 
     def __init__(self, file_path):
         self.info = dict()
@@ -83,21 +277,23 @@ class PEAnalyser():
         return len(data) / self.info['FileSize']
 
     def set_info_from_pe(self):
-        self.set_info_from_file_header()
-        self.set_info_from_optional_header()
-        self.set_info_from_imports()
-        self.set_info_from_exports()
-        self.set_info_from_section()
+        self.set_file_header_info()
+        self.set_optional_header_info()
+        self.set_imports_info()
+        self.set_exports_info()
+        self.set_section_info()
+        self.set_resources_info()
+        self.set_tls_info()
+        self.set_rich_header_info()
         self.set_certification_info()
-        self.set_info_from_resources()
 
-    def set_info_from_file_header(self):
+    def set_file_header_info(self):
         if hasattr(self.pe, 'FILE_HEADER'):
             self.info['PE']['FILE_HEADER'] = dict()
             for member in PEAnalyser.__FILE_HEADER:
                 self.info['PE']['FILE_HEADER'][member] = getattr(self.pe.FILE_HEADER, member, None)
 
-    def set_info_from_optional_header(self):
+    def set_optional_header_info(self):
         if hasattr(self.pe, 'OPTIONAL_HEADER'):
             self.info['PE']['OPTIONAL_HEADER'] =  dict()
             for member in PEAnalyser.__OPTIONAL_HEADER:
@@ -109,7 +305,7 @@ class PEAnalyser():
                     self.info['PE']['OPTIONAL_HEADER']['DATA_DIRECTORY'][structure.name]['VirtualAddress'] = structure.VirtualAddress
                     self.info['PE']['OPTIONAL_HEADER']['DATA_DIRECTORY'][structure.name]['Size'] = structure.Size
 
-    def set_info_from_imports(self):
+    def set_imports_info(self):
         if hasattr(self.pe, 'DIRECTORY_ENTRY_IMPORT'):
             self.info['PE']['import'] = []
             for entry in self.pe.DIRECTORY_ENTRY_IMPORT:
@@ -137,7 +333,7 @@ class PEAnalyser():
                         import_info['Functions'].append({'Address': imp.address, 'Name': funcname})
                 self.info['PE']['import'].append(import_info)
 
-    def set_info_from_exports(self):
+    def set_exports_info(self):
         if hasattr(self.pe, 'DIRECTORY_ENTRY_EXPORT'):
             self.info['PE']['exports'] = dict()
             libname = self.pe.DIRECTORY_ENTRY_EXPORT.name
@@ -174,7 +370,7 @@ class PEAnalyser():
         else:
             return False
 
-    def set_info_from_section(self):
+    def set_section_info(self):
         dis = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_32)
         if hasattr(self.pe, 'sections'):
             self.info['PE']['sections'] = []
@@ -258,7 +454,7 @@ class PEAnalyser():
 
         return entropy
 
-    def set_info_from_resources(self):
+    def set_resources_info(self):
         res_array = []
         if hasattr(self.pe, 'DIRECTORY_ENTRY_RESOURCE'):
             for resource_type in self.pe.DIRECTORY_ENTRY_RESOURCE.entries:
@@ -287,6 +483,75 @@ class PEAnalyser():
                                                   "sublanguage": sublang})
         if len(res_array) != 0:
             self.info['PE']['Resource'] = res_array
+
+    def set_rich_header_info(self):
+        if hasattr(self.pe, 'RICH_HEADER'):
+            rich_header = []
+            for i in range(0, len(getattr(self.pe.RICH_HEADER, 'values', [])), 2):
+                comp_id = self.pe.RICH_HEADER.values[i]
+                comp_cnt = self.pe.RICH_HEADER.values[i + 1]
+                comp_name = self.__COMPID_DICT.get(comp_id, '*unknown*')
+                rich_header.append({"id" : comp_id, "count" : comp_cnt, "name" : comp_name})
+            if len(rich_header) != 0:
+                self.info['PE']['RichHeader'] = rich_header
+
+    # Freom peframe
+    def set_tls_info(self):
+        for d in self.pe.OPTIONAL_HEADER.DATA_DIRECTORY:
+            if d.name == "IMAGE_DIRECTORY_ENTRY_TLS":
+                tls_directories = self.pe.parse_directory_tls(d.VirtualAddress, d.Size).struct
+                self.info['PE']['TLS'] = {
+                    "StartAddressOfRawData": tls_directories.StartAddressOfRawData,
+                    "EndAddressOfRawData": tls_directories.EndAddressOfRawData,
+                    "AddressOfIndex": tls_directories.AddressOfIndex,
+                    "AddressOfCallBacks": tls_directories.AddressOfCallBacks,
+                    "SizeOfZeroFill": tls_directories.SizeOfZeroFill,
+                    "Characteristics": tls_directories.Characteristics,
+                }
+                break
+
+    def set_debug_info(self):
+        DEBUG_TYPE = {
+            "IMAGE_DEBUG_TYPE_UNKNOWN": 0,
+            "IMAGE_DEBUG_TYPE_COFF": 1,
+            "IMAGE_DEBUG_TYPE_CODEVIEW": 2,
+            "IMAGE_DEBUG_TYPE_FPO": 3,
+            "IMAGE_DEBUG_TYPE_MISC": 4,
+            "IMAGE_DEBUG_TYPE_EXCEPTION": 5,
+            "IMAGE_DEBUG_TYPE_FIXUP": 6,
+            "IMAGE_DEBUG_TYPE_BORLAND": 9,
+        }
+
+        result = {}
+        # https://github.com/mnemonic-no/dnscache/blob/master/tools/pdbinfo.py
+        for d in self.pe.OPTIONAL_HEADER.DATA_DIRECTORY:
+            if d.name == "IMAGE_DIRECTORY_ENTRY_DEBUG":
+                debug_directories = self.pe.parse_debug_directory(d.VirtualAddress, d.Size)
+                for debug_directory in debug_directories:
+                    if debug_directory.struct.Type == DEBUG_TYPE["IMAGE_DEBUG_TYPE_CODEVIEW"]:
+                        result.update({
+                            "PointerToRawData": debug_directory.struct.PointerToRawData,
+                            "size": debug_directory.struct.SizeOfData
+                        })
+                self.info['PE']['debug'] = result
+                break
+
+    # Frome peframe
+    def set_relocations_info(self):
+        result = {}
+        for d in self.pe.OPTIONAL_HEADER.DATA_DIRECTORY:
+            if d.name == "IMAGE_DIRECTORY_ENTRY_BASERELOC": break
+            result.update({"VirtualAddress": d.VirtualAddress, "Size": d.Size})
+            reloc_directories = self.pe.parse_relocations_directory(d.VirtualAddress, d.Size)
+            result.update({"count": len(reloc_directories)})
+            i = 0
+            my_items = {}
+            for items in reloc_directories:
+                i = i + 1
+                for item in items.entries:
+                    my_items.update({"reloc_" + str(i): len(items.entries)})
+            result.update({"details": my_items})
+            self.info['PE']['relocations'] = result
 
     # Frome peframe
     def set_certification_info(self):
