@@ -289,6 +289,15 @@ class PEAnalyser():
         self.set_signatures_info()
         self.set_certification_info()
 
+    def set_overlay_info(self):
+        overlay_offset = self.pe.get_overlay_data_start_offset()
+        if overlay_offset:
+            overlay = {}
+            overlay["Offset"] = overlay_offset
+            overlay["Size"] = self.info['FileSize'] - overlay_offset
+            overlay["FileRatio"] = overlay["Size"] / self.info['FileSize']
+            self.info['PE']['overlay'] = overlay
+
     def set_signatures_info(self):
         signatures = peutils.SignatureDatabase('userdb.txt')
         matches = signatures.match_all(self.pe, ep_only=True)
@@ -441,7 +450,7 @@ class PEAnalyser():
                 char = chr(char)
                 if char in printable:
                     found_str += char
-                elif len(found_str) >= 4:
+                elif len(found_str) >= 6:
                     self.info['Strings'].append(found_str)
                     found_str = ""
                 else:
@@ -453,8 +462,6 @@ class PEAnalyser():
 
     # From pefile
     def __get_entropy(slef, data):
-        """Calculate the entropy of a chunk of data."""
-
         if not data:
             return 0.0
 
@@ -534,9 +541,7 @@ class PEAnalyser():
             "IMAGE_DEBUG_TYPE_FIXUP": 6,
             "IMAGE_DEBUG_TYPE_BORLAND": 9,
         }
-
         result = {}
-        # https://github.com/mnemonic-no/dnscache/blob/master/tools/pdbinfo.py
         for d in self.pe.OPTIONAL_HEADER.DATA_DIRECTORY:
             if d.name == "IMAGE_DIRECTORY_ENTRY_DEBUG":
                 debug_directories = self.pe.parse_debug_directory(d.VirtualAddress, d.Size)
