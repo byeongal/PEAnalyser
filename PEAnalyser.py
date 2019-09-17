@@ -10,10 +10,10 @@ import peutils
 import ssdeep
 import M2Crypto
 import capstone
-import patoolib
 import ordlookup
 import simplejson as json
 
+from pyunpack import Archive
 
 __VERSION = '1.0 Alpha'
 
@@ -660,12 +660,18 @@ class PEAnalyser():
 
     def dump_overlay(self, overlay_path):
         if 'PE' in self.info and 'overlay' in self.info['PE']:
-            with open(overlay_path, 'wb') as f:
-                f.write(self.file_data[self.info['PE']['overlay']["Offset"]:])
-            try:
-                patoolib.extract_archive(overlay_path)
-            except Exception as e:
-                print(e)
+            if os.path.isdir(overlay_path):
+                pass
+            else:
+                with open(overlay_path, 'wb') as f:
+                    f.write(self.file_data[self.info['PE']['overlay']["Offset"]:])
+                try:
+                    dst_path = os.path.join(os.path.split(overlay_path)[0], 'overlay')
+                    if not os.path.exists(dst_path):
+                        os.makedirs(dst_path)
+                    Archive(overlay_path).extractall(dst_path)
+                except Exception as e:
+                    print(e)
 
     def dump_dict(self):
         return self.info
