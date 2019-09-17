@@ -10,8 +10,10 @@ import peutils
 import ssdeep
 import M2Crypto
 import capstone
+import patoolib
 import ordlookup
 import simplejson as json
+
 
 __VERSION = '1.0 Alpha'
 
@@ -256,16 +258,16 @@ class PEAnalyser():
         self.info = dict()
         file_name = os.path.basename(file_path)
         with open(file_path, 'rb') as f:
-            file_data = f.read()
+            self.file_data = f.read()
 
         self.info['FileName'] = file_name
-        self.info['FileSize'] = len(file_data)
-        self.info['hash'] = self.__get_hash(file_data)
+        self.info['FileSize'] = len(self.file_data)
+        self.info['hash'] = self.__get_hash(self.file_data)
 
-        self.set_fuzzy_hash(file_data)
-        self.set_strings(file_data)
+        self.set_fuzzy_hash(self.file_data)
+        self.set_strings(self.file_data)
         try:
-            self.pe = pefile.PE(data = file_data)
+            self.pe = pefile.PE(data = self.file_data)
             self.info['PE'] = dict()
             self.set_info_from_pe()
         except pefile.PEFormatError as e:
@@ -288,6 +290,7 @@ class PEAnalyser():
         self.set_rich_header_info()
         self.set_signatures_info()
         self.set_certification_info()
+        self.set_overlay_info()
 
     def set_overlay_info(self):
         overlay_offset = self.pe.get_overlay_data_start_offset()
@@ -651,6 +654,18 @@ class PEAnalyser():
             os.makedirs(abspath)
         with open(json_path, 'w') as f:
             json.dump(self.info, f)
+        if 'PE' in self.info and 'overlay' in self.info['PE']:
+            # temp
+            self.dump_overlay(os.path.splitext(json_path)[0] + '.7z')
+
+    def dump_overlay(self, overlay_path):
+        if 'PE' in self.info and 'overlay' in self.info['PE']:
+            with open(overlay_path, 'wb') as f:
+                f.write(self.file_data[self.info['PE']['overlay']["Offset"]:])
+            try:
+                patoolib.extract_archive(overlay_path)
+            except Exception as e:
+                print(e)
 
     def dump_dict(self):
         return self.info
