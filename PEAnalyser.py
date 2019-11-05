@@ -396,14 +396,19 @@ class PEAnalyser():
             return False
 
     def set_section_info(self):
-        dis = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_32)
+        if self.info['PE']['FILE_HEADER']['Machine'] == 0x14c:
+            dis = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_32)
+        elif self.info['PE']['FILE_HEADER']['Machine'] == 0x8664:
+            dis = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_64)
+        else:
+            dis = None
         if hasattr(self.pe, 'sections'):
             self.info['PE']['sections'] = []
             for section in self.pe.sections:
                 try:
                     section_name = str(section.Name, 'utf-8').encode('ascii', errors='ignore').strip().decode('ascii').strip(' \t\r\n\0')
                 except:
-                    section_name = str(section.Name, 'ISO-8859-1').encde('ascii', errors='ignore').strip().decode('ascii').strip(' \t\r\n\0')
+                    section_name = str(section.Name, 'ISO-8859-1').encode('ascii', errors='ignore').strip().decode('ascii').strip(' \t\r\n\0')
                 if section_name == '':
                     section_name = '.noname'
                 section_data = section.get_data()
@@ -424,13 +429,14 @@ class PEAnalyser():
                 section_info['file_ratio'] = self.__get_file_ratio(section_data)
                 if section_info['executable']:
                     tmp2 = []
-                    for code_line in dis.disasm(section_data, 0x1000):
-                        tmp2.append([
-                            code_line.address,
-                            ' '.join([format(each_byte, '02x') for each_byte in code_line.bytes]),
-                            '{}'.format(code_line.mnemonic).strip(),
-                            '{}'.format(code_line.op_str).strip()
-                        ])
+                    if not dis:
+                        for code_line in dis.disasm(section_data, 0x1000):
+                            tmp2.append([
+                                code_line.address,
+                                ' '.join([format(each_byte, '02x') for each_byte in code_line.bytes]),
+                                '{}'.format(code_line.mnemonic).strip(),
+                                '{}'.format(code_line.op_str).strip()
+                            ])
                     if len(tmp2) != 0:
                         section_info['asm'] = tmp2
                     else:
