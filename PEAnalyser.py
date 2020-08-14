@@ -1,6 +1,6 @@
+import re
 import os
 import math
-import string
 import hashlib
 
 from collections import Counter
@@ -451,23 +451,9 @@ class PEAnalyser():
         }
 
     def set_strings(self, data):
-        printable = set(string.printable)
         self.info['Strings'] = []
-        found_str = ""
-        for char in data:
-            try:
-                char = chr(char)
-                if char in printable:
-                    found_str += char
-                elif len(found_str) >= 6:
-                    self.info['Strings'].append(found_str)
-                    found_str = ""
-                else:
-                    found_str = ""
-            except:
-                found_str = ""
-        if len(found_str) >= 4:
-            self.info['Strings'].append(found_str)
+        for s in re.findall(b"[\x20-\x7e]{4,}", data):
+            self.info['Strings'].append(s.decode())
 
     # From pefile
     def __get_entropy(slef, data):
