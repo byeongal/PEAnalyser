@@ -507,7 +507,7 @@ class PEAnalyser():
                 comp_cnt = self.pe.RICH_HEADER.values[i + 1]
                 comp_name = self.__COMPID_DICT.get((comp_id & 0xffff0000) >> 16, '*unknown*')
                 comp_build = comp_id & 0xffff
-                rich_header.append({"id" : comp_id, "count" : comp_cnt, "name" : comp_name, "build" : comp_build})
+                rich_header.append({"id" : (comp_id & 0xffff0000) >> 16, "count" : comp_cnt, "name" : comp_name, "build" : comp_build})
             if len(rich_header) != 0:
                 self.info['PE']['RichHeader'] = rich_header
 
