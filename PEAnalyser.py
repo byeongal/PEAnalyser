@@ -580,58 +580,61 @@ class PEAnalyser():
 
             bio = M2Crypto.BIO.MemoryBuffer(bytes(signature))
             if bio:
-                pkcs7_obj = M2Crypto.m2.pkcs7_read_bio_der(bio.bio_ptr())
-                if pkcs7_obj:
-                    p7 = M2Crypto.SMIME.PKCS7(pkcs7_obj)
-                    for cert in p7.get0_signers(M2Crypto.X509.X509_Stack()) or []:
-                        subject = cert.get_subject()
-                        try:
-                            serial_number = "%032x" % cert.get_serial_number()
-                        except:
-                            serial_number = ''
-                        try:
-                            common_name = subject.CN
-                        except:
-                            common_name = ''
-                        try:
-                            country = subject.C
-                        except:
-                            country = ''
-                        try:
-                            locality = subject.L
-                        except:
-                            locality = ''
-                        try:
-                            organization = subject.O
-                        except:
-                            organization = ''
-                        try:
-                            email = subject.Email
-                        except:
-                            email = ''
-                        try:
-                            valid_from = cert.get_not_before()
-                        except:
-                            valid_from = ''
-                        try:
-                            valid_to = cert.get_not_after()
-                        except:
-                            valid_to = ''
-                        details.update({
-                            "serial_number": str(serial_number),
-                            "common_name": str(common_name),
-                            "country": str(country),
-                            "locality": str(locality),
-                            "organization": str(organization),
-                            "email": str(email),
-                            "valid_from": str(valid_from),
-                            "valid_to": str(valid_to),
-                            "hash": {
-                                "sha1": "%040x" % int(cert.get_fingerprint("sha1"), 16),
-                                "md5": "%032x" % int(cert.get_fingerprint("md5"), 16),
-                                "sha256": "%064x" % int(cert.get_fingerprint("sha256"), 16)
-                            }
-                        })
+                try:
+                    pkcs7_obj = M2Crypto.m2.pkcs7_read_bio_der(bio.bio_ptr())
+                    if pkcs7_obj:
+                        p7 = M2Crypto.SMIME.PKCS7(pkcs7_obj)
+                        for cert in p7.get0_signers(M2Crypto.X509.X509_Stack()) or []:
+                            subject = cert.get_subject()
+                            try:
+                                serial_number = "%032x" % cert.get_serial_number()
+                            except:
+                                serial_number = ''
+                            try:
+                                common_name = subject.CN
+                            except:
+                                common_name = ''
+                            try:
+                                country = subject.C
+                            except:
+                                country = ''
+                            try:
+                                locality = subject.L
+                            except:
+                                locality = ''
+                            try:
+                                organization = subject.O
+                            except:
+                                organization = ''
+                            try:
+                                email = subject.Email
+                            except:
+                                email = ''
+                            try:
+                                valid_from = cert.get_not_before()
+                            except:
+                                valid_from = ''
+                            try:
+                                valid_to = cert.get_not_after()
+                            except:
+                                valid_to = ''
+                            details.update({
+                                "serial_number": str(serial_number),
+                                "common_name": str(common_name),
+                                "country": str(country),
+                                "locality": str(locality),
+                                "organization": str(organization),
+                                "email": str(email),
+                                "valid_from": str(valid_from),
+                                "valid_to": str(valid_to),
+                                "hash": {
+                                    "sha1": "%040x" % int(cert.get_fingerprint("sha1"), 16),
+                                    "md5": "%032x" % int(cert.get_fingerprint("md5"), 16),
+                                    "sha256": "%064x" % int(cert.get_fingerprint("sha256"), 16)
+                                }
+                            })
+                except Exception as e:
+                    result['error'] = e.__repr__()
 
             result.update({
                 "virtual_address": cert_address,
