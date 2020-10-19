@@ -528,29 +528,51 @@ class PEAnalyser():
 
     def set_debug_info(self):
         DEBUG_TYPE = {
-            "IMAGE_DEBUG_TYPE_UNKNOWN": 0,
-            "IMAGE_DEBUG_TYPE_COFF": 1,
-            "IMAGE_DEBUG_TYPE_CODEVIEW": 2,
-            "IMAGE_DEBUG_TYPE_FPO": 3,
-            "IMAGE_DEBUG_TYPE_MISC": 4,
-            "IMAGE_DEBUG_TYPE_EXCEPTION": 5,
-            "IMAGE_DEBUG_TYPE_FIXUP": 6,
-            "IMAGE_DEBUG_TYPE_BORLAND": 9,
+            0 : 'IMAGE_DEBUG_TYPE_UNKNOWN',
+            1 : 'IMAGE_DEBUG_TYPE_COFF',
+            2 : 'IMAGE_DEBUG_TYPE_CODEVIEW',
+            3 : 'IMAGE_DEBUG_TYPE_FPO',
+            4 : 'IMAGE_DEBUG_TYPE_MISC',
+            5 : 'IMAGE_DEBUG_TYPE_EXCEPTION',
+            6 : 'IMAGE_DEBUG_TYPE_FIXUP',
+            7 : 'IMAGE_DEBUG_TYPE_OMAP_TO_SRC',
+            8 : 'IMAGE_DEBUG_TYPE_OMAP_FROM_SRC',
+            9 : 'IMAGE_DEBUG_TYPE_BORLAND',
+            10 : 'IMAGE_DEBUG_TYPE_RESERVED10',
+            11 : 'IMAGE_DEBUG_TYPE_CLSID',
+            16 : 'IMAGE_DEBUG_TYPE_REPRO',
+            20 : 'IMAGE_DEBUG_TYPE_EX_DLLCHARACTERISTICS',
         }
+        debug_address = self.pe.OPTIONAL_HEADER.DATA_DIRECTORY[
+            pefile.DIRECTORY_ENTRY['IMAGE_DIRECTORY_ENTRY_DEBUG']].VirtualAddress
+        debug_size = self.pe.OPTIONAL_HEADER.DATA_DIRECTORY[pefile.DIRECTORY_ENTRY['IMAGE_DIRECTORY_ENTRY_DEBUG']].Size
         result = {}
-        for d in self.pe.OPTIONAL_HEADER.DATA_DIRECTORY:
-            if d.name == "IMAGE_DIRECTORY_ENTRY_DEBUG":
-                debug_directories = self.pe.parse_debug_directory(d.VirtualAddress, d.Size)
-                for debug_directory in debug_directories:
-                    if debug_directory.struct.Type == DEBUG_TYPE["IMAGE_DEBUG_TYPE_CODEVIEW"]:
-                        result.update({
-                            "PointerToRawData": debug_directory.struct.PointerToRawData,
-                            "size": debug_directory.struct.SizeOfData
-                        })
-                self.info['PE']['debug'] = result
-                break
+        if debug_address != 0 and debug_size != 0:
+            debug_directories = self.pe.parse_debug_directory(debug_address, debug_size)
+            result['NumberOfDebug'] = len(debug_directories)
+            result['Details'] = []
+            for debug_directory in debug_directories:
+                tmp = {
+                    'TimeDateStamp' : debug_directory.struct.TimeDateStamp,
+                    'MajorVersion' : debug_directory.struct.MajorVersion,
+                    'MinorVersion': debug_directory.struct.MinorVersion,
+                    'Type' : DEBUG_TYPE.get(debug_directories.struct.Type, 'Unknown{:06X}'.format(debug_directories.struct.Type)),
+                    'Size' : debug_directories.struct.SizeOfData,
+                    'AddressOfRawData' : debug_directories.struct.AddressOfRawData,
+                }
+                if not debug_directory.entry is None:
+                    if debug_directory.entry.name == 'CV_INFO_PDB70':
+                        tmp['entry'] = {
+                            'name' : debug_directory.entry.name,
+                            'CvSignature' : debug_directory.entry.CvSignature,
+                            'PdbFileName' : str(debug_directory.entry.PdbFileName, 'utf-8').encode('ascii', errors='ignore').strip().decode('ascii').strip(' \t\r\n\0'),
+                            'Age' : debug_directory.entry.Age,
+                        }
 
-    # Frome peframe
+                result['Details'].append(tmp)
+            self.info['PE']['debug'] = result
+
+    # From peframe
     def set_relocations_info(self):
         result = {}
         for d in self.pe.OPTIONAL_HEADER.DATA_DIRECTORY:
@@ -567,7 +589,7 @@ class PEAnalyser():
             result.update({"details": my_items})
             self.info['PE']['relocations'] = result
 
-    # Frome peframe
+    # From peframe
     def set_certification_info(self):
         result = {}
         cert_address = self.pe.OPTIONAL_HEADER.DATA_DIRECTORY[
