@@ -493,6 +493,7 @@ class PEAnalyser():
                                                   "data": raw_data,
                                                   "offset": hex(resource_lang.data.struct.OffsetToData),
                                                   "size": resource_lang.data.struct.Size,
+                                                  "file_ratio" : file_ratio,
                                                   "entropy" : ent,
                                                   "language": lang,
                                                   "sublanguage": sublang})
@@ -543,9 +544,12 @@ class PEAnalyser():
             16 : 'IMAGE_DEBUG_TYPE_REPRO',
             20 : 'IMAGE_DEBUG_TYPE_EX_DLLCHARACTERISTICS',
         }
-        debug_address = self.pe.OPTIONAL_HEADER.DATA_DIRECTORY[
-            pefile.DIRECTORY_ENTRY['IMAGE_DIRECTORY_ENTRY_DEBUG']].VirtualAddress
-        debug_size = self.pe.OPTIONAL_HEADER.DATA_DIRECTORY[pefile.DIRECTORY_ENTRY['IMAGE_DIRECTORY_ENTRY_DEBUG']].Size
+        try:
+            debug_address = self.pe.OPTIONAL_HEADER.DATA_DIRECTORY[pefile.DIRECTORY_ENTRY['IMAGE_DIRECTORY_ENTRY_DEBUG']].VirtualAddress
+            debug_size = self.pe.OPTIONAL_HEADER.DATA_DIRECTORY[pefile.DIRECTORY_ENTRY['IMAGE_DIRECTORY_ENTRY_DEBUG']].Size
+        except:
+            debug_address = 0
+            debug_size = 0
         result = {}
         if debug_address != 0 and debug_size != 0:
             debug_directories = self.pe.parse_debug_directory(debug_address, debug_size)
@@ -562,13 +566,31 @@ class PEAnalyser():
                 }
                 if not debug_directory.entry is None:
                     if debug_directory.entry.name == 'CV_INFO_PDB70':
+                        try:
+                            pdb_file_name = str(debug_directory.entry.PdbFileName, 'utf-8').encode('ascii', errors='ignore').strip().decode('ascii').strip(' \t\r\n\0')
+                        except:
+                            pdb_file_name = str(debug_directory.entry.PdbFileName, 'ISO-8859-1').encode('ascii',errors='ignore').strip().decode('ascii').strip(' \t\r\n\0')
                         tmp['entry'] = {
                             'name' : debug_directory.entry.name,
                             'CvSignature' : debug_directory.entry.CvSignature,
-                            'PdbFileName' : str(debug_directory.entry.PdbFileName, 'utf-8').encode('ascii', errors='ignore').strip().decode('ascii').strip(' \t\r\n\0'),
+                            'PdbFileName' : pdb_file_name,
                             'Age' : debug_directory.entry.Age,
                         }
-
+                    elif debug_directories.entry.name == 'IMAGE_DEBUG_MISC':
+                        try:
+                            data = str(debug_directory.entry.Data, 'utf-8').encode('ascii', errors='ignore').strip().decode('ascii').strip(' \t\r\n\0')
+                        except:
+                            data = str(debug_directory.entry.Data, 'ISO-8859-1').encode('ascii',errors='ignore').strip().decode('ascii').strip(' \t\r\n\0')
+                        tmp['entry'] = {
+                            'name' : debug_directory.entry.name,
+                            'DataType' : debug_directory.entry.DataType,
+                            'Length' : debug_directory.entry.Length,
+                            'Data' : data,
+                        }
+                    else:
+                        tmp['entry'] = {
+                            'name': debug_directory.entry.name,
+                        }
                 result['Details'].append(tmp)
             self.info['PE']['debug'] = result
 
@@ -592,9 +614,11 @@ class PEAnalyser():
     # From peframe
     def set_certification_info(self):
         result = {}
-        cert_address = self.pe.OPTIONAL_HEADER.DATA_DIRECTORY[
-            pefile.DIRECTORY_ENTRY['IMAGE_DIRECTORY_ENTRY_SECURITY']].VirtualAddress
-        cert_size = self.pe.OPTIONAL_HEADER.DATA_DIRECTORY[pefile.DIRECTORY_ENTRY['IMAGE_DIRECTORY_ENTRY_SECURITY']].Size
+        try:
+            cert_address = self.pe.OPTIONAL_HEADER.DATA_DIRECTORY[pefile.DIRECTORY_ENTRY['IMAGE_DIRECTORY_ENTRY_SECURITY']].VirtualAddress
+            cert_size = self.pe.OPTIONAL_HEADER.DATA_DIRECTORY[pefile.DIRECTORY_ENTRY['IMAGE_DIRECTORY_ENTRY_SECURITY']].Size
+        except:
+            cert_address = cert_size = 0
 
         if cert_address != 0 and cert_size != 0:
             signature = self.pe.write()[cert_address + 8:]
