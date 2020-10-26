@@ -15,7 +15,7 @@ import simplejson as json
 
 from pyunpack import Archive
 
-__VERSION = '1.0 Alpha'
+__VERSION = '2020.10.20'
 
 class PEAnalyser():
     __FILE_HEADER = [
